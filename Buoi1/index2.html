@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>App Delegate và Scene Delegate trong Xcode 11 và iOS 13</title>
+    </head>
+    <body>
+        <h3>App Delegate và Scene Delegate trong Xcode 11 và iOS 13</h3>
+        <p>29 tháng 10, 2019</p>
+        <p>Chào các bạn, chắc hẳn đối với những ai đã code iOS một thời gian, thì điều thay đổi giữa Xcode 11 với những bản cũ trước nó khiến chúng ta bỡ ngỡ, như học lại từ đầu.</p>
+        <img width="300px" src="https://learnappmaking.com/wp-content/uploads/2019/10/appdelegate-scenedelegate-xcode-11-ios-13-770x400.jpg">
+        <p>Class <strong>SceneDelegate</strong> mới trong iOS 13 để làm gì? Kể từ Xcode 11, <strong>SceneDelegate</strong> được thêm tự động mẫu với dự án ứng dụng mặc định của iOS khi tạo ra. Chính xác thì scene này làm gì?</p>
+        <p>Bài viết này sẽ ghi ra một số thay đổi của iOS 13 và Xcode 11, sẽ tập trung đặc biệt đối với <strong>AppDelegate</strong> và <strong>SceneDelegate</strong>, làm thế nào để chúng ảnh hưởng tới <strong>SwiftUI, Storyboards</strong> và <strong>Xib.</strong></p>
+        <p>Chúng ta sẽ tìm hiểu:</p>
+        <ul>
+            <li>AppDelegate và SceneDelegate</li>
+            <li>Làm thế nào để chúng làm việc cùng nhau khi khởi chạy ứng dụng</li>
+            <li>Cách thiết lập ứng dụng theo SceneDelegate</li>
+            <li>SceneDelegate với SwiftUI và Storyboard</li>
+        </ul>    
+        <strong><h4>The App Delegate</h4></strong> 
+        <p>Chúng ta có thể đã quen thuộc với AppDelegate. Nó là điểm khởi đầu của một ứng dụng iOS. Ứng dụng của nó (_: <strong>didFinishLaunchingWithOptions</strong> :) là chức năng đầu tiên mà hệ điều hành gọi khi khởi chạy ứng dụng. Class AppDelegate thông qua giao thức <strong>UIApplicationDelegate</strong>, một phần của khung <strong>UIKit</strong>, như vậy, vì là vai trò đại biểu của ứng dụng nên khi thay đổi từ iOS 12 sang iOS 13 thì chúng ta sẽ phải viết xử lý ở đây.</p>
+        <p>Ở AppDelegate, những điều chúng ta thường viết mã ứng dụng cho iOS 12 (trở xuống) là:</p>
+        <ul>
+            <li>Thiết lập trình điều khiển xem đầu tiên của ứng dụng (được gọi là trình điều khiển xem gốc)</li>
+            <li>Định cấu hình cài đặt ứng dụng và các thành phần khởi động</li>
+            <li>Đăng kí trình xử lý thông báo</li>
+            <li>Trả lời các sự kiện trong vòng đời của ứng dụng, chẳng hạn như ứng dụng chạy nền, tiếp tục ứng dụng hoặc thoát khỏi ứng dụng</li>
+            <li>Một ứng dụng sẵn khi sử dụng Sotyboard là nó chỉ trả về true, ví dụ: </li>
+        </ul>
+        <pre>
+        <code>
+        <span>
+            func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
+            {
+                  return true
+            }
+        </span></code></pre>
+        <ul><li>Một ứng dụng đơn giản với file xib sẽ được thiết lập như sau: </li></ul>
+        <pre>
+        <code>
+            func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
+            {   
+                let timeline = TimelineViewController()
+                let navigation = UINavigationController(rootViewController: timeline)
+            
+                let frame = UIScreen.main.bounds
+                window = UIWindow(frame: frame)
+            
+                window!.rootViewController = navigation
+                window!.makeKeyAndVisible()
+            
+                return true
+            }
+        </code></pre>
+        <p>Trong đoạn mã trên, chúng ta tạo ra một  bộ điều khiển <strong>ViewController</strong>, đặt nó và bộ điều hướng NavigationController và gán nó cho thuộc tính <strong>rootViewController</strong> của đối tượng UIWindow. <strong>window</strong> là một thuộc tính của AppDelegate, và nó là một cửa sổ mà ứng dụng có.</p>
+        <p>Một cửa sổ ứng dụng là khái niệm quan trọng, về bản chất, cửa sổ là ứng dụng và hầu hết các ứng dụng iOS chỉ có một cửa sổ. Nó chứa các giao diện người của người dùng <strong>(UI)</strong>, gửi các sự kiện đến các khung nhìn và nó cung cấp một phông nền chính để hiển thị nội dung ứng dụng. </p>
+        <strong><h4>... so với The Scene Delegate</h4></strong>
+        <p>Từ iOS 13 trở lên, SceneDelegate đảm nhận một số vai trò đại biểu của ứng dụng. Quan trọng nhất, khái niệm về một cửa sổ <strong>(window)</strong> được thay thế bằng một bối cảnh <strong>(scene)</strong>. Một ứng dụng có thể có nhiều bối cảnh và một cảnh hiện đóng vai trò làm nền cho giao diện và nội dung ứng dụng.</p>
+        <p>Đặc biệt là khái niệm có một ứng dụng có nhiều bối cảnh sẽ rất thú vị, bởi vì nó cho phép chúng ta xây dựng các ứng dụng <strong>đa cửa sổ</strong> trên <strong>iOS</strong> và <strong>iPasOS</strong>. Mỗi tài liệu văn bản trong một ứng dụng xử lý văn bản có thể có cảnh riêng của nó, ví dụ:</p>
+        <p>Người dùng cũng có thể tạo một bản sao của một cảnh, chạy hiệu quả nhiều phiên bản của một ứng dụng cùng một lúc.</p>
+        <p>Trong điều kiện thực tế, việc chuyển sang sử dụng một đại biểu cảnh Scene có thể thấy rõ nhất trong Xcode11 ở ba vị trí:</p>
+        <ul>
+            <il>Một dự án iOS mới hiện có lớp SceneDelegate, được tạo tự động, bao gồm các sự kiện vòng đời quen thuộc như hoạt động, ngắt kết nối</il>
+            <il>Class AppDelegate có 2 chức năng mới liên quan đến các phiên cảnh, được gọi là <strong>(_:configurationForConnecting:options:)</strong> và <strong>application(_:didDiscardSceneSessions:)</strong></il>
+            <il>Danh sách thuộc tính info.plist nhận bản khai cảnh <strong>application(Application Scene Manifest)</strong>, liệt kê các cảnh là một phần của ứng dụng này, bao gồm tên lớp, đại biểu và bảng phân cảnh của chúng</il>
+        </ul>
+        <p><strong>1. Scene Delegate Class</strong></p>
+        <img width="300px" src="https://techmaster.vn/media/static/8103/bmrvfoc51cobehp8spu0">
+        <p>Một chức năng quan trọng nhất của uỷ nhiệm cảnh là scene(_:willConnectTo:options:). Nói cách khác, nó tương tự như vai trò của application(_: didFinishLaunchingWithOptions :) trên iOS 12. Hàm này được gọi khi một cảnh được thêm vào ứng dụng, do đó chúng ta định cấu hình ở đây.</p>
+        <p>SceneDelegate cũng có các chức năng sau:</p>
+        <p><strong>sceneDidDisconnect (_ :)</strong> được gọi khi một cảnh bị ngắt kết nối khỏi ứng dụng (Lưu ý rằng nó có thể kết nối lại sau này.)</p>
+        <p><strong>sceneDidBecomeActive (_ :)</strong> được gọi khi người dùng bắt đầu tương tác với một cảnh, chẳng hạn như chọn nó từ trình chuyển đổi ứng dụng</p>
+        <p><strong>sceneWillResignActive (_ :)</strong> được gọi khi người dùng ngừng tương tác với một cảnh, ví dụ bằng cách chuyển sang cảnh khác</p>
+        <p><strong>sceneWill EntryForeground (_ :)</strong> được gọi khi một cảnh đi vào foreground, tức là bắt đầu hoặc tiếp tục từ trạng thái nền</p>
+        <p><strong>sceneDid EntryBackground (_ :)</strong> được gọi khi một cảnh vào background, tức là ứng dụng được thu nhỏ nhưng vẫn hiện diện trong nền</p>
+        <i><pre>See the symmetries between those functions? Active/inactive, background/foreground, and “disconnect”. These are typical lifecycle events for any application or process.</pre></i>
+        <p><strong>2. App Delegate: Scene Sessions</strong></p>
+        <img width="300px" src="https://techmaster.vn/media/static/8103/bmrvrcs51cobehp8sq00">
+        <p>Trên iOS 13, lớp AppDelegate hiện bao gồm hai chức năng ủy nhiệm khác liên quan đến việc quản lý các phiên cảnh. Khi một cảnh được tạo trong ứng dụng của bạn, một đối tượng phiên cảnh sẽ theo dõi tất cả thông tin liên quan đến cảnh đó.</p>
+        <p>Các chức năng này là:</p>
+        <p><strong>application (_: configureForConnecting:option:)</strong>: cần trả về một đối tượng cấu hình khi tạo cảnh mới</p>
+        <p><strong>application (_: didDiscardSceneSimes :)</strong>: được gọi khi người dùng ứng dụng của bạn đóng một hoặc nhiều cảnh thông qua trình chuyển đổi ứng dụng</p>
+        <p>Ở đây, phiên cảnh được sử dụng để chỉ định vai trò cho một cảnh. Nó cũng được sử dụng để khôi phục trạng thái của một cảnh, rất hữu ích nếu bạn muốn sử dụng phục hồi trạng thái. Khôi phục trạng thái cho phép bảo tồn và tạo lại giao diện người dùng giữa các lần khởi chạy ứng dụng.</p>
+        <p><strong>Application(_: didDiscardSceneSimes :)</strong> khá đơn giản. Nó gọi là khi người dùng ứng dụng đóng một hoặc nhiều cảnh thông qua trình chuyển đổi ứng dụng. Có thể sử dụng chức năng này để loại bỏ các tài nguyên mà những cảnh này đã sử dụng, vì chúng không còn cần thiết nữa.</p>
+        <p><strong>3. Info.plist Application Scene Manifest</strong></p>
+        <img width="300px" src="https://learnappmaking.com/wp-content/uploads/2019/10/application-scene-manifest-2.jpg">
+        <p>Mỗi cảnh trong ứng dụng cần được khai báo trong <strong>Application Scene Manifest</strong>, hầu hết các ứng dụng chỉ có một cảnh, nhưng chúng ta có thể tạo ra nhiều hơn.</p>
+        <p><strong>Application Scene Manifest</strong> là một phần của file Info.plist, là nơi  cấu hình giá trị của ứng dụng. Danh sách thuộc tính này bao gồm các giá trị như tên ứng dụng, phiên bản, hướng giao diện được hỗ trợ và các cảnh khác nhau.</p>
+        <p>Điều quan trọng cần lưu ý ở đây là bạn khai báo các loại phiên chứ không phải bản thân mỗi phiên. Ứng dụng có thể hỗ trợ một cảnh, tạo các bản sao của cảnh đó và sử dụng cảnh đó để tạo một ứng dụng nhiều cửa sổ.</p>
+        <strong><h4>Sử dụng Scene Delegate với Swift UI</h4></strong> 
+        <img width="300px" src="https://learnappmaking.com/wp-content/uploads/2019/10/application-scene-manifest-3-swiftui.jpg">
+        <p>Nó khá chuẩn cho một ứng dụng mặc định. Điều nổi bật là cấu hình mặc định <strong>không có Storyboard Name</strong>. Hãy nhớ rằng, nếu bạn muốn hỗ trợ đa cửa sổ, bạn phải set <strong>Enable Multiple Windows</strong> thành <strong>YES</strong>.</p>
+        <p>Chúng ta thiết lập các cảnh vào ứng dụng, cũng như thiết lập các chế độ xem ban đầu vào class SceneDelegate</p>
+        <pre>
+            <code>
+                class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+
+                    var window: UIWindow?
+                
+                    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+                
+                        let contentView = ContentView()
+                
+                        if let windowScene = scene as? UIWindowScene {
+                            let window = UIWindow(windowScene: windowScene)
+                            window.rootViewController = UIHostingController(rootView: contentView)
+                            self.window = window
+                            window.makeKeyAndVisible()
+                        }
+                    }
+                
+                    ...
+        </code></pre>
+        <i><pre>You can set up a basic Xcode 11 project, with SwiftUI, by choosing File → New → Project…. Then, choose Single View App. Finally, select SwiftUI for User Interface.</pre></i>
+        <strong><h4>Sử dụng Scene Delegate với Storyboards</h4></strong> 
+        <p>Storyboard, bên cạnh XIB, là một cách hiệu quả để xây dựng giao diện người dùng cho ứng dụng iOS của bạn. Trên iOS 13, điều đó không khác gì. Trong tương lai, chúng ta sẽ thấy nhiều ứng dụng SwiftUI hơn, nhưng hiện tại, storyboard phổ biến hơn</p>
+        <p>Làm việc với Storyboard chúng ta sẽ không thấy khác nhiều so với từ trước giờ vẫn làm, chúng ta chỉ cần tạo mới dự án với User Interface là Storyboard</p>
+        <i><pre>You can set up a basic Xcode 11 project, with SwiftUI, by choosing File → New → Project…. Then, choose Single View App. Finally, select SwiftUI for User Interface.</pre></i>
+        <img width="300px" src="https://techmaster.vn/media/static/8103/bms06fs51cobehp8sq1g">
+        <strong><h4>Thiết lập ứng dụng theo chương trình</h4></strong>
+        <p>Rất nhiều nhà phát triển tạo UI của họ theo chương trình và với sự khởi đầu của SwiftUI. Điều gì sẽ xảy ra nếu không sử dụng Storyboard, nhưng bạn sử dụng các XIB riêng lẻ để tạo ứng dụng của bạn? Hãy cùng kiểm tra xem SceneDelegate sẽ phù hợp như thế nào.</p>
+        <p>Trước hết, SceneDelegate và <strong>Application Scene Manifest</strong> chúng ta để mặc định. Chúng ta không sử dụng Storyboard, và thay vào đó, chúng ta sẽ thiết lập trình điều khiển chế độ xem ban đầu trong cảnh <strong>(_: willConnectTo:options:)</strong> bên trong lớp <strong>SceneDelegate</strong>.</p>
+        <code><pre>
+            class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+
+                var window: UIWindow?
+            
+                func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions)
+                {
+                    if let windowScene = scene as? UIWindowScene {
+            
+                        let window = UIWindow(windowScene: windowScene)
+                        let timeline = TimelineViewController()
+            
+                        let navigation = UINavigationController(rootViewController: timeline)
+                        window.rootViewController = navigation
+            
+                        self.window = window
+                        window.makeKeyAndVisible()
+                    }
+                }
+            
+                ...
+        </pre></code>
+        <p>hoặc viết một cách khác (nhưng bản chất giống nhau):</p>
+        <code><pre>
+            class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+
+                var window: UIWindow?
+            
+            
+                func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+            
+                    guard let windowScene = (scene as? UIWindowScene) else { return }
+                    
+                    window = UIWindow(frame: windowScene.coordinateSpace.bounds)
+                    window?.windowScene = windowScene
+                    
+                    let timeline = TimelineViewController()
+                    let navigation = UINavigationController(rootViewController: timeline)
+                    
+                    window.rootviewController = navigation
+                    window.makeKeyAndVisible()
+                }
+            
+                ...
+        </pre></code>
+        <p>Chúng ta có thuộc tính cửa sổ kiểu UIWindow, nó khởi tạo với đối tượng windowScene.</p>
+        <p>Trong khối if let, đoạn mã quen thuộc xuất hiện: đây chính xác là cách chúng ta thiết lập bộ điều khiển xem gốc trên iOS 12 trở về trước, với AppDelegate. </p>
+        <p>Khá đơn giản phải không? Cốt lõi của việc sử dụng ủy nhiệm cảnh theo cách này, là chuyển một số mã của từ AppDelegate sang SceneDelegate và định cấu hình đúng <strong>Application Scene Manifest</strong></p>
+        <strong><h4>Kiểm tra tính khả dụng trên iOS 13 trở lên và trước nó</h4></strong> 
+        <p>Một điều quan trọng nữa, là khi chúng ta muốn hạ target của ứng dụng và xử lý để ứng dụng có thể chạy, build trên cả iOS 13 và dưới iOS 13 (với simulator và thiết bị thật) thì chúng ta phải kiểm tra tính khả dụng của những hàm, ứng dụng trong AppDelegate và SceneDelegate</p>
+        <img width="300px" src="https://techmaster.vn/media/static/8103/bms0hrs51cobehp8sq20">
+        <p>Sự so sánh ở trên có nghĩa là nếu ứng dụng chạy trên thiết bị từ <strong>iOS 12</strong> trở xuống thì chế độ xem ban đầu được hệ điều hành gọi vào <strong>scope else</strong> của ứng dụng</p>
+        <p><strong>(_:didFinishLaunchingWithOptions:)</strong>, ngược lại nếu thiết bị từ <strong>iOS 13</strong> trở lên thì chế độ xem ban đầu được hệ điều hành gọi vào bối cảnh <strong>(_:willConnectTo:options:)</strong> của <strong>SceneDelegate</strong></p>
+        <p>Bài viết được tham khảo <a href="https://learnappmaking.com/scene-delegate-app-delegate-xcode-11-ios-13/" target="_blank">tại đây.</a> </p>
+          
+    </body>
+</html>
